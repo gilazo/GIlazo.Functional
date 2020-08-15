@@ -6,6 +6,12 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>../../RulesetOverrides.ruleset</CodeAnalysisRuleSet>
+
+    <PackageId>Gilazo.Functional</PackageId>
+    <Version>0.0.1</Version>
+    <PackageTags>Functional;Monads;Either;Fluent</PackageTags>
+    <Authors>gilazo</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
