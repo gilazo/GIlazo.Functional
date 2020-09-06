@@ -5,178 +5,167 @@ using System.Threading.Tasks;
 
 namespace Gilazo.Functional
 {
+	/// <summary>
+	/// Base Either TL TR
+	/// </summary>
+	/// <typeparam name="TL"></typeparam>
+	/// <typeparam name="TR"></typeparam>
 	[DebuggerStepThrough]
-	public sealed class Either<TL, TR>
+	public abstract class Either<TL, TR>
 	{
-		[AllowNull]
-		private readonly TR _right;
+		[DisallowNull]
+		protected readonly object _value;
 
-		[AllowNull]
-		private readonly TL _left;
+		/// <summary>
+		/// True if this is type of Right TL TR
+		/// </summary>
+		/// <value></value>
+		public bool IsRight =>
+			this switch
+			{
+				Right<TL, TR> _ => true,
+				_ => false
+			};
 
-		public bool IsRight { get; }
-
+		/// <summary>
+		/// True if this is not type of Right TL TR
+		/// </summary>
 		public bool IsLeft => !IsRight;
 
-		public Either(TR right) => (_right, _left, IsRight) = (right, default, true);
+		/// <summary>
+		/// Ctor for building Either TR
+		/// </summary>
+		/// <param name="value"></param>
+		protected Either([DisallowNull] TR value) => _value = value;
 
-		public Either(TL left) => (_left, _right, IsRight) = (left, default, false);
+		/// <summary>
+		/// Ctor for building Either TL
+		/// </summary>
+		/// <param name="value"></param>
+		protected Either([DisallowNull] TL value) => _value = value;
 
-		public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);
+		/// <summary>
+		/// Implicitly convert TR to Either TL TR
+		/// </summary>
+		/// <param name="value"></param>
+		/// <typeparam name="TL"></typeparam>
+		/// <typeparam name="TR"></typeparam>
+		public static implicit operator Either<TL, TR>([DisallowNull] TR value) =>
+			new Right<TL, TR>(value);
 
-		public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
+		/// <summary>
+		/// Implicitly convert Either TL TR to TR
+		/// </summary>
+		/// <param name="either"></param>
+		public static implicit operator TR(Either<TL, TR> either) =>
+			(TR)(Right<TL, TR>)either;
 
-		public static implicit operator Task<Either<TL, TR>>(Either<TL, TR> either) => Task.FromResult(either);
+		/// <summary>
+		/// Implicitly convert TL to Either TL TR
+		/// </summary>
+		/// <param name="value"></param>
+		/// <typeparam name="TL"></typeparam>
+		/// <typeparam name="TR"></typeparam>
+		public static implicit operator Either<TL, TR>([DisallowNull] TL value) =>
+			new Left<TL, TR>(value);
+
+		/// <summary>
+		/// Implicitly convert Either TL TR to TL
+		/// </summary>
+		/// <param name="either"></param>
+		public static implicit operator TL(Either<TL, TR> either) =>
+			(TL)(Left<TL, TR>)either;
 
 		#region Match
 
-		public void Match(Action<TR> right, Action<TL> left)
-		{
-			if (IsRight)
-			{
-				right(_right);
-			}
-			else
-			{
-				left(_left);
-			}
-		}
-
+		/// <summary>
+		/// Match executes right if Either TR else executes left
+		/// Use for demoting Either._value
+		/// </summary>
+		/// <param name="right"></param>
+		/// <param name="left"></param>
+		/// <typeparam name="TTo"></typeparam>
+		/// <returns>TTo</returns>
 		public TTo Match<TTo>(Func<TR, TTo> right, Func<TL, TTo> left) =>
 			IsRight
-				? right(_right)
-				: left(_left);
+				? right((TR)_value)
+				: left((TL)_value);
+
+		/// <summary>
+		/// Match executes right if Either TR else executes left
+		/// Use for inline execution of actions on Either._value
+		/// </summary>
+		/// <param name="right"></param>
+		/// <param name="left"></param>
+		/// <returns>Either TL TR</returns>
+		public Either<TL,TR> Match(Action<TR> right, Action<TL> left)
+		{
+			if (IsRight)
+			{
+				right((TR)_value);
+			}
+			else
+			{
+				left((TL)_value);
+			}
+
+			return this;
+		}
 
 		#endregion
 
-		#region Match async
-
-		public async Task Match(Func<TR, Task> right, Action<TL> left)
-		{
-			if (IsRight)
-			{
-				await right(_right);
-			}
-			else
-			{
-				left(_left);
-			}
-		}
-
-		public async Task Match(Action<TR> right, Func<TL, Task> left)
-		{
-			if (IsRight)
-			{
-				right(_right);
-			}
-			else
-			{
-				await left(_left);
-			}
-		}
-
-		public async Task Match(Func<TR, Task> right, Func<TL, Task> left)
-		{
-			if (IsRight)
-			{
-				await right(_right);
-			}
-			else
-			{
-				await left(_left);
-			}
-		}
-
-		public async Task<TTo> Match<TTo>(Func<TR, Task<TTo>> right, Func<TL, TTo> left) =>
-			IsRight
-				? await right(_right)
-				: left(_left);
-
-		public async Task<TTo> Match<TTo>(Func<TR, TTo> right, Func<TL, Task<TTo>> left) =>
-			IsRight
-				? right(_right)
-				: await left(_left);
-
-		public async Task<TTo> Match<TTo>(Func<TR, Task<TTo>> right, Func<TL, Task<TTo>> left) =>
-			IsRight
-				? await right(_right)
-				: await left(_left);
-
-		#endregion
 
 		#region Map
 
-		public Either<TL, TTo> Map<TTo>(Func<TR, TTo> right) =>
+		/// <summary>
+		/// Map executes func if Either TR else returns Either TL
+		/// Use for converting Either TL TR to Either TL TTo
+		/// </summary>
+		/// <param name="func"></param>
+		/// <typeparam name="TTo"></typeparam>
+		/// <returns>Either TL TTo</returns>
+		public Either<TL, TTo> Map<TTo>(Func<TR, TTo> func) where TTo : notnull =>
 			IsRight
-				? new Either<TL, TTo>(right(_right))
-				: new Either<TL, TTo>(_left);
+				? (Either<TL, TTo>)new Right<TL, TTo>(func((TR)_value))
+				: (Either<TL, TTo>)new Left<TL, TTo>((TL)_value);
 
-		public Either<TLTo, TRTo> Map<TLTo, TRTo>(Func<TR, TRTo> right, Func<TL, TLTo> left) =>
+		/// <summary>
+		/// MapLeft executes func if Either TL else returns Either TR
+		/// Use for converting Either TL TR to Either TTo TR
+		/// </summary>
+		/// <param name="func"></param>
+		/// <typeparam name="TTo"></typeparam>
+		/// <returns>Either TTo TR</returns>
+		public Either<TTo, TR> MapLeft<TTo>(Func<TL, TTo> func) where TTo : notnull =>
 			IsRight
-				? new Either<TLTo, TRTo>(right(_right))
-				: new Either<TLTo, TRTo>(left(_left));
-
-		#endregion
-
-		#region Map async
-
-		public async Task<Either<TL, TTo>> Map<TTo>(Func<TR, Task<TTo>> right) =>
-			IsRight
-				? new Either<TL, TTo>(await right(_right))
-				: new Either<TL, TTo>(_left);
-
-		public async Task<Either<TLTo, TRTo>> Map<TLTo, TRTo>(Func<TR, Task<TRTo>> right, Func<TL, TLTo> left) =>
-			IsRight
-				? new Either<TLTo, TRTo>(await right(_right))
-				: new Either<TLTo, TRTo>(left(_left));
-
-		public async Task<Either<TLTo, TRTo>> Map<TLTo, TRTo>(Func<TR, TRTo> right, Func<TL, Task<TLTo>> left) =>
-			IsRight
-				? new Either<TLTo, TRTo>(right(_right))
-				: new Either<TLTo, TRTo>(await left(_left));
-
-		public async Task<Either<TLTo, TRTo>> Map<TLTo, TRTo>(Func<TR, Task<TRTo>> right, Func<TL, Task<TLTo>> left) =>
-			IsRight
-				? new Either<TLTo, TRTo>(await right(_right))
-				: new Either<TLTo, TRTo>(await left(_left));
+				? (Either<TTo, TR>)new Right<TTo, TR>((TR)_value)
+				: (Either<TTo, TR>)new Left<TTo, TR>(func((TL)_value));
 
 		#endregion
 
 		#region Bind
 
-		public Either<TL, TR> Bind(Func<TR, Either<TL, TR>> right) =>
+		/// <summary>
+		/// Bind exectues func if Either TR else returns Either TL
+		/// Use for binding two or more functions together
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns>Either TL TR</returns>
+		public Either<TL, TR> Bind(Func<TR, Either<TL, TR>> func) =>
 			IsRight
-				? right(_right)
+				? func((TR)_value)
 				: this;
 
-		public Either<TL, TR> Bind(Func<TR, Either<TL, TR>> right, Func<TL, Either<TL, TR>> left) =>
+		/// <summary>
+		/// BindLeft executes func if Either TL else returns Either TR
+		/// Use for binding two or more functions together
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns>Either TL TR</returns>
+		public Either<TL, TR> BindLeft(Func<TL, Either<TL, TR>> func) =>
 			IsRight
-				? right(_right)
-				: left(_left);
-
-		#endregion
-
-		#region Bind async
-
-		public async Task<Either<TL, TR>> Bind(Func<TR, Task<Either<TL, TR>>> right) =>
-			IsRight
-				? await right(_right)
-				: this;
-
-		public async Task<Either<TL, TR>> Bind(Func<TR, Task<Either<TL, TR>>> right, Func<TL, Either<TL, TR>> left) =>
-			IsRight
-				? await right(_right)
-				: left(_left);
-
-		public async Task<Either<TL, TR>> Bind(Func<TR, Either<TL, TR>> right, Func<TL, Task<Either<TL, TR>>> left) =>
-			IsRight
-				? right(_right)
-				: await left(_left);
-
-		public async Task<Either<TL, TR>> Bind(Func<TR, Task<Either<TL, TR>>> right, Func<TL, Task<Either<TL, TR>>> left) =>
-			IsRight
-				? await right(_right)
-				: await left(_left);
+				? this
+				: func((TL)_value);
 
 		#endregion
 	}

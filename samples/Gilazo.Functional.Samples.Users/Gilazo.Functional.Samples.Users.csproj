@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Gilazo.Functional\Gilazo.Functional.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ProjectGuid>{F56B6CAD-A8CA-48EB-9CD9-FEBBCC46C83C}</ProjectGuid>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <CodeAnalysisRuleSet>../../RulesetOverrides.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+</Project>

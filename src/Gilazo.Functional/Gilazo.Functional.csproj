@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <ProjectGuid>{62492203-0923-47C1-A762-1367D4A29DD9}</ProjectGuid>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <CodeAnalysisRuleSet>../../RulesetOverrides.ruleset</CodeAnalysisRuleSet>
 
     <PackageId>Gilazo.Functional</PackageId>
-    <Version>0.0.1</Version>
+    <Version>1.0.0</Version>
     <PackageTags>Functional;Monads;Either;Fluent</PackageTags>
     <Authors>gilazo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryURL>https://github.com/gilazo/GIlazo.Functional</RepositoryURL>
   </PropertyGroup>
 
   <ItemGroup>
