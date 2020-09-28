@@ -9,7 +9,7 @@ functional styles.
 
 | Package | Version |
 | --- | --- |
-| [Gilazo.Functional](https://www.nuget.org/packages/Roslynator.Analyzers) | [![NuGet](https://img.shields.io/nuget/v/Gilazo.Functional.svg)](https://www.nuget.org/packages/Gilazo.Functional)
+| [Gilazo.Functional](https://www.nuget.org/packages/Gilazo.Functional) | [![NuGet](https://img.shields.io/nuget/v/Gilazo.Functional.svg)](https://www.nuget.org/packages/Gilazo.Functional)
 
 ## Examples
 
