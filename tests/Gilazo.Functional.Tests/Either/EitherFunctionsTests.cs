@@ -195,7 +195,7 @@ namespace Gilazo.Functional
 			);
 
 			// Assert
-			Assert.IsType<Left<int, string>>(actual);
+			Assert.IsType<Right<int, string>>(actual);
 			Assert.Equal(initial, (string)actual);
 		}
 
